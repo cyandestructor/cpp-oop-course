@@ -2,19 +2,18 @@
 #include <string>
 
 /*
-* Herencia:
+* Modificador de acceso 'protected':
 * 
-* El concepto de herencia en la Programación Orientada a Objetos se puede
-* describir como la posibilidad de crear jerarquías de clases, donde
-* existen clases base o super clases, y clases derivadas o sub clases
+* Ya hemos visto los modificadores de acceso 'private' y 'public',
+* el tercer modificador de acceso en C++ es 'protected'
 * 
-* Las clases derivadas heredan, es decir, reciben los atributos y métodos
-* de su clase base. Esta característica permite la reutilización de código
+* Los miembros protegidos de una clase no son accesibles a través de una instancia,
+* fuera del código de la clase, pero sí son accesibles para sus clases derivadas
 */
 
-class Enemy // Clase Base
+class Enemy
 {
-private:
+protected: // Al cambiar el modificador de acceso, las clases derivadas tienen acceso a estos miembros
 	int hp;
 	int attack;
 	int defense;
@@ -95,76 +94,86 @@ public:
 	}
 };
 
-// Skeleton es una clase derivada de Enemy
-// La sintaxis de la herencia es C++ es la siguiente:
-// class Derived : public Base
-class Skeleton : public Enemy
+class Mummy : public Enemy
 {
 private:
-	// La clase derivada puede tener sus propios atributos y métodos
-	int arrows;
+	int mana;
 
 public:
-
-	Skeleton()
-		:arrows(0)
+	Mummy()
+		:mana(0)
 	{
-		std::cout << "Constructor de Skeleton" << std::endl;
-	}
-	
-	// Una clase derivada puede acceder al constructor de su clase base
-	// a través de una lista inicializadora y además inicializar sus propios atributos
-	Skeleton(int hp, int attack, int defense)
-		:Enemy(hp, attack, defense), arrows(0)
-	{
-		std::cout << "Constructor de Skeleton" << std::endl;
 	}
 
-	int GetArrows()
+	Mummy(int hp, int attack, int defense)
+		:Enemy(hp, attack, defense), mana(0)
 	{
-		return arrows;
 	}
 
-	void SetArrows(int arrows)
+	int GetMana()
 	{
-		this->arrows = arrows;
+		return mana;
 	}
 
-	void Shoot()
+	void SetMana(int mana)
 	{
-		if (arrows > 0)
+		if (mana < 0)
+			return;
+
+		this->mana = mana;
+	}
+
+	/*
+	* Supongamos que una momia tiene el poder de recuperar vida
+	* a cambio de maná
+	* 
+	* Al ser Mummy una clase derivada de Enemy, y al ser hp un
+	* atributo protegido (protected) de Enemy, Mummy puede acceder
+	* a este atributo
+	*/
+	void Heal()
+	{
+		if (mana > 0)
 		{
-			std::cout << "El Esqueleto dispara una flecha" << std::endl;
-			arrows--;
-		}
-		else
-		{
-			std::cout << "El Esqueleto no tiene flechas" << std::endl;
-			
-			// ERROR: Skeleton SÍ hereda el atributo hp de Enemy, pero éste es private
-			// por lo tanto NO es accesible
-			// this->hp = 5;
-			
-			// CORRECTO: Skeleton hereda los métodos de Enemy, y al ser SetHp público, es accesible
-			// SetHp(5);
+			mana--;
+			hp++; // Accesible por ser atributo protegido de Enemy
 		}
 	}
 };
 
 int main()
 {
-	// Nota lo que pasa cuando se instancia la clase Skeleton
-	// El constructor de Enemy se ejecuta primero y luego
-	// el constructor de Skeleton
-	Skeleton* esqueletoA = new Skeleton();
+	Mummy* mummy = new Mummy();
 
-	// Con un objeto de la clase Skeleton, podemos acceder a miembros
-	// tanto de Skeleton como de su clase base Enemy
-	esqueletoA->SetAttack(30);
-	esqueletoA->SetArrows(20);
+	// ERROR: hp es un miembro protegido de Enemy, por lo tanto es accesible dentro de Mummy
+	// pero no fuera de esa clase por medio de una instancia
+	// mummy->hp = 30;
+	mummy->SetHp(30);
+	mummy->SetMana(5);
 
-	esqueletoA->Attack();
-	esqueletoA->Shoot();
+	std::cout << "La momia tiene " << mummy->GetHp() << " de HP" << std::endl;
+	std::cout << "La momia tiene " << mummy->GetMana() << " de Mana" << std::endl;
+	
+	std::cout << "Curando..." << std::endl;
+	mummy->Heal();
 
-	delete esqueletoA;
+	std::cout << "La momia tiene " << mummy->GetHp() << " de HP" << std::endl;
+	std::cout << "La momia tiene " << mummy->GetMana() << " de Mana" << std::endl;
+
+	delete mummy;
 }
+
+// TABLA DE ACCESO
+
+/*
+* MODIFICADOR DE ACCESO	|			ACCESIBLE DESDE...				|
+* ----------------------+-------------------------------------------+
+*						|	CLASE	|	HERENCIA	|	INSTANCIA	|
+* ----------------------+-----------+---------------+---------------+
+* public				|	O		|	O			|	O			|
+* ----------------------+-----------+---------------+---------------+
+* protected				|	O		|	O			|				|
+* ----------------------+-----------+---------------+---------------+
+* private				|	O		|				|				|
+* ----------------------+-----------+---------------+---------------+
+*/
