@@ -1,92 +1,115 @@
 #include <iostream>
+#include <string>
 
 /*
-* La clase es la unidad de código de la programación orientada a objetos
+* Las clases tienen un método que se ejecuta cuando se crea la instancia, llamado 'constructor'
+* También tienen un método que se ejecuta antes de que se destruya la instancia, llamado 'destructor'
 * 
-* Para declarar una clase en C++ usamos la palabra reservada 'class'
+* El constructor tiene las siguientes reglas:
+*	+ No retorna un valor
+*	+ Tiene el mismo nombre que la clase
+*	+ Una clase puede tener varios constructores
 * 
-* Los miembros de una clase son todos los datos y funciones dentro del cuerpo de la clase
+* El destructor tiene las siguientes reglas:
+*	+ No retorna un valor
+*	+ No tiene parámetros
+*	+ Tiene el mismo nombre que la clase, precedido por una '~'
+*	+ Una clase sólo puede tener un destructor
 * 
-* A diferencia de las estructuras, los miembros de una clase en C++ son privados
-* por defecto, eso quiere decir que no son accesibles a menos que se declaren
-* como públicos (Más adelante entraremos con más detalle en los modificadores de acceso)
+* Si no definimos un constructor o un destructor, por defecto
+* existe un constructor y destructor ocultos.
+* 
+* El constructor por defecto no tiene parámetros
+* 
+* Si definimos un constructor, el constructor por defecto desaparece,
+* por lo que si queremos un constructor sin parámetros, también debemos
+* definirlo
 */
 class Enemy
 {
-public: // Modificador de acceso público, necesario para acceder a los miembros de la clase
-
-	// *** Miembros de la clase
-	
-	// Atributos
+public:
 	int Hp;
 	int AttackPower;
 	int Defense;
+	std::string Name;
 
-	// Métodos
+	// Definimos un constructor con parámetros
+	Enemy(int hp, int attack, int defense)
+	{
+		std::cout << "Ejecutando el constructor" << std::endl;
+		
+		Hp = hp;
+		AttackPower = attack;
+		Defense = defense;
+		Name = "Enemigo";
+	}
+	
+	// Puedo tener múltiples constructores
+	Enemy(int hp, int attack, int defense, const std::string& name)
+	{
+		std::cout << "Ejecutando el constructor" << std::endl;
+
+		Hp = hp;
+		AttackPower = attack;
+		Defense = defense;
+		Name = name;
+	}
+
+	// Si aún queremos tener un constructor con parámetros, debemos definirlo tambien
+	Enemy()
+	{
+		std::cout << "Ejecutando el constructor" << std::endl;
+
+		Hp = 0;
+		AttackPower = 0;
+		Defense = 0;
+		Name = "Enemigo";
+	}
+
+	// Defino un constructor personalizado
+	~Enemy()
+	{
+		std::cout << "Ejecutando el destructor" << std::endl;
+	}
+
 	void Attack()
 	{
-		// Desde los métodos podemos acceder a los atributos de la clase
-		std::cout << "The Enemy attacks with " << AttackPower << " of power" << std::endl;
+		std::cout << "The Enemy " << Name << " attacks with " << AttackPower << " of power" << std::endl;
 	}
 
 	void Die()
 	{
 		if (Hp <= 0)
 		{
-			std::cout << "The Enemy dies" << std::endl;
+			std::cout << "The Enemy " << Name << " dies" << std::endl;
 		}
 		else
 		{
-			std::cout << "The Enemy has " << Hp << " HP" << std::endl;
+			std::cout << "The Enemy " << Name << " has " << Hp << " HP" << std::endl;
 		}
 	}
-	// ***
 };
 
 int main()
 {
-	// La clase sólo es una plantilla que podemos usar para crear objetos
-	// La clase se utiliza como si fuera un tipo de dato
-	
-	// Aquí estamos instanciando la clase, lo que crea una instancia u objeto
-	// enemigoA es un objeto de la clase Enemy
-	Enemy enemigoA;
-
-	// Otra forma de instanciar es en el Heap con el operador new
-	// enemigoB es un objeto de la clase Enemy
-	Enemy* enemigoB = new Enemy();
-
-	// Una instancia sólo ocurre cuando se está reservando memoria para el objeto
-	// enemigoC NO es un objeto de la clase Enemy porque no se reserva memoria
-	Enemy* enemigoC;
-
-	// Podemos acceder a los miembros de un objeto a través de la notación de punto o flecha
-
 	std::cout << "Enemigo A" << std::endl;
-	// Notación de punto
-	enemigoA.Hp = 100;
-	enemigoA.AttackPower = 20;
-	enemigoA.Attack();
-	enemigoA.Die();
+	// Instanciamos un enemigo usando un constructor con parámetros
+	{
+		Enemy enemigoA = Enemy(100, 20, 5);
+
+		enemigoA.Attack();
+		enemigoA.Die();
+	} // Como enemigoA existe en este scope, al terminarse, se destruye y ejecuta el destructor
 
 	std::cout << std::endl;
 	std::cout << "Enemigo B" << std::endl;
-	// Notación de flecha
-	enemigoB->Hp = 0;
-	enemigoB->AttackPower = 35;
+
+	Enemy* enemigoB = new Enemy(0, 35, 10, "Paul");
+	
 	enemigoB->Attack();
 	enemigoB->Die();
 
-	// Error: enemigoC no es una instancia y por lo tanto no tiene memoria reservada
-	// enemigoC->Hp = 5;
-
-	/*
-	* Nota que, aunque enemigoA y enemigoB sean de la misma clase
-	* y compartan atributos, los valores de esos atributos
-	* son únicos para cada objeto
-	* 
-	* Si modifico el Hp de enemigoA, no afecta al Hp de enemigoB
-	*/
-
-	delete enemigoB; // Recuerda que es necesario liberar la memoria
+	delete enemigoB; // Al liberar la memoria, se ejecuta el destructor para enemigoB
+	
+	Enemy* enemigoC; // Como no es instancia, no se ejecuta el constructor
 }
