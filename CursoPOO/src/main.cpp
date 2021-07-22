@@ -2,100 +2,156 @@
 #include <string>
 
 /*
-* Los modificadores de acceso son importantes para proteger los datos
+* Pilares de la Programación Orientada a Objetos:
+*	+ Encapsulamiento
+*	+ Abstracción
+*	+ Herencia
+*	+ Polimorfismo
+* 
+* Se tratan de conceptos base de la POO, que describen
+* qué se puede hacer y cómo se sugiere usar este paradigma de programación
+*/
+
+/*
+* Encapsulamiento:
+* 
+* Este pilar de la Programación orientada a objetos se refiere
+* a las medidas que debemos tomar para cuidar el estado interno
 * de nuestros objetos
 * 
-* En C++ existen tres modificadores de acceso:
-*	+ public
-*	+ private
-*	+ protected
+* El estado interno se refiere a los datos internos que afectan el
+* funcionamiento de nuestros objetos, usualmente los atributos
 * 
-* Revisaremos el modificador de acceso protected más adelante, vamos a enfocarnos en
-* los dos principales, public y private
+* Cuidar el estado interno se refiere a mantener los valores
+* de estos datos en valores válidos o esperados, para evitar
+* errores. Esto vuelve a nuestro código más robusto
+* 
+* Por ejemplo, una clase Enemy, tiene un atributo Hp. En este caso
+* cuidar su estado interno sería evitar que en cualquier momento el
+* valor del Hp sea negativo
+* 
+* Mantener el estado interno se logra a través de dos estrategias:
+* 'Data Hiding' u 'Ocultación de Información', y 'Data Protection' o
+* 'Protección de Información'
+* 
+* 'Data Hiding' se logra cuando los atributos de una clase están
+* ocultos o privados, y sólo es posible acceder a ellos a través de
+* una llamada intermedia, como un método público
+* 
+* Estos métodos públicos que sirven como intermediarios para
+* acceder a los atributos privados son comúnmente llamados 'getters'
+* y 'setters'
+* 
+* Los 'getters' sirven para obtener (get) la información, los 'setters'
+* sirven para modificar (set) la información.
+* 
+* Finalmente, 'Data Protection' se trata de acciones a tomar para
+* mantener los atributos siempre en valores válidos, usualmente
+* usando lógica de validación en los métodos 'setters'
 */
 class Enemy
 {
 private:
-	/*
-	* El modificador de acceso private vuelve los miembros privados,
-	* lo que significa que sólo se puede acceder a ellos dentro del código
-	* de la clase, como en sus métodos
-	* 
-	* Los miembros private NO pueden ser accedidos a través de un
-	* objeto o instancia
-	*/
-	int Hp;
-	int AttackPower;
-	int Defense;
-	std::string Name;
+	// Como parte del principio de encapsulamiento, los atributos se vuelven privados
+	int hp;
+	int attack;
+	int defense;
+	std::string name;
 public:
-	/*
-	* El modificador de acceso public vuelve los miembros públicos,
-	* lo que significa que se puede acceder a ellos desde dentro del
-	* código de la clase, o desde afuera a través de una instancia
-	* u objeto
-	*/
 	Enemy()
-		: Hp(0), AttackPower(0), Defense(0), Name("Enemigo")
+		: hp(0), attack(0), defense(0), name("Enemigo")
 	{
-		std::cout << "Ejecutando el constructor" << std::endl;
 	}
 
 	Enemy(int hp, int attack, int defense, const std::string& name)
-		: Hp(hp), AttackPower(attack), Defense(defense), Name(name)
+		: hp(hp), attack(attack), defense(defense), name(name)
 	{
-		std::cout << "Ejecutando el constructor A" << std::endl;
 	}
 
 	Enemy(int hp, int attack, int defense)
 		: Enemy(hp, attack, defense, "Enemigo")
 	{
-		std::cout << "Ejecutando el constructor B" << std::endl;
 	}
 
-	~Enemy()
+	// Definimos los getters y setters públicos para los atributos
+	// Podemos escribir ambos para cada atributo, o sólo uno si
+	// queremos que sea sólo lectura o sólo escritura
+	// El estándar es usar la nomenclatura Get[Atributo] y Set[Atributo]
+
+	int GetHp()
 	{
-		std::cout << "Ejecutando el destructor" << std::endl;
+		return hp;
+	}
+	
+	// Nota que usamos el guión bajo como prefijo para evitar confusiones entre el parámetro y el atributo
+	void SetHp(int _hp)
+	{
+		// Mira cómo usamos Data Protection para evitar que el Hp sea menor a 0
+		if (_hp < 0)
+			return; // Si el Hp que recibe es menor a 0, retorna sin modificar el atributo
+		
+		hp = _hp;
+	}
+
+	int GetAttack()
+	{
+		return attack;
+	}
+
+	void SetAttack(int _attack)
+	{
+		if (_attack < 0)
+			return;
+		
+		attack = _attack;
+	}
+
+	int GetDefense()
+	{
+		return defense;
+	}
+
+	void SetDefense(int _defense)
+	{
+		if (_defense < 0)
+			return;
+
+		defense = _defense;
 	}
 
 	void Attack()
 	{
-		std::cout << "The Enemy " << Name << " attacks with " << AttackPower << " of power" << std::endl;
+		std::cout << "The Enemy " << name << " attacks with " << attack << " of power" << std::endl;
 	}
 
 	void Die()
 	{
-		if (Hp <= 0)
+		if (hp <= 0)
 		{
-			std::cout << "The Enemy " << Name << " dies" << std::endl;
+			std::cout << "The Enemy " << name << " dies" << std::endl;
 		}
 		else
 		{
-			std::cout << "The Enemy " << Name << " has " << Hp << " HP" << std::endl;
+			std::cout << "The Enemy " << name << " has " << hp << " HP" << std::endl;
 		}
 	}
 };
 
 int main()
 {
-	std::cout << "Enemigo A" << std::endl;
-	Enemy enemigoA = Enemy(100, 20, 5);
+	Enemy enemigoA = Enemy(100, 20, 5, "Paul");
 
-	// Name es private, por lo que no se puede acceder a él a través de la instancia
-	// enemigoA.Name = "Mike";
+	enemigoA.Attack();
+	enemigoA.Die();
 
-	// Attack() y Die() son miembros públicos, por lo que podemos acceder a ellos a través del objeto
+	// Accedemos a sus atributos usando los métodos públicos
+	
+	enemigoA.SetAttack(100);
+	enemigoA.SetDefense(-5);
+	enemigoA.SetHp(0);
+
+	std::cout << "El enemigo A tiene " << enemigoA.GetDefense() << " de defensa" << std::endl;
+
 	enemigoA.Attack();
 	enemigoA.Die();
 }
-
-// TABLA DE ACCESO
-
-/*
-* MODIFICADOR DE ACCESO	|	ACCESIBLE DESDE...		|
-* ----------------------+---------------------------+
-*						|	CLASE	|	INSTANCIA	|
-* ----------------------+-----------+---------------+
-* public				|	O		|	O			|
-* private				|	O		|				|
-*/
