@@ -2,53 +2,60 @@
 #include <string>
 
 /*
-* Abstracción:
+* Los miembros estáticos de una clase, a diferencia de los miembros normales,
+* no están ligados a una instancia, sino a la clase en sí
 * 
-* El principio de abstracción en la Programación Orientada a Objetos
-* puede entenderse de dos manera
+* Al estar ligados a la clase y no a una instancia, acceder a los miembros
+* estáticos no requiere un objeto, se accede a ellos directamente a través de la clase
 * 
-* La primera es la abstracción de conceptos de la vida real, a datos que
-* una computadora, a través de la programación, puede entender
+* Además, si un método de una instancia afecta un atributo estático, este cambio
+* se verá reflejado para todas las instancias
 * 
-* Por ejemplo, un Enemigo, para un videojuego, tiene puntos de salud, estadísticas de
-* ataque y defensa, además puede atacar y morir
-* 
-* Al convertir todas esas características y comportamientos en código para
-* un lenguaje de programación, estamos abstrayendo el concepto de Enemigo
-* a sus componentes más básicos, y utilizando sólo los que son relevantes para
-* nuestra aplicación
-* 
-* La segunda forma de entender la abstracción es como una manera de
-* simplificar un proceso complejo y resumirlo a una acción sencilla
-* 
-* Por ejemplo, al encender tu computadora, tú estás haciendo algo tan
-* sencillo como presionar el botón de encendido, pero no eres consciente
-* (y puede que ni siquiera sea relevante para ti) del complejo proceso de fondo:
-* consumir la energía, encender el procesador, iniciar el sistema operativo, etcétera
+* Al no depender de una instancia, los métodos estáticos de una clase no pueden
+* acceder a los miembros no estáticos, ya sean atributos o métodos
 */
-
-// Primera forma de abstracción: Reducimos un Enemigo a sus componentes y comportamientos básicos
 class Enemy
 {
 private:
+	// Los miembros estáticos también son afectados por los modificadores de acceso
+	// Para declarar un miembro estático se utiliza la palabra reservada 'static'
+	static int Count;
+
 	int hp;
 	int attack;
 	int defense;
 	std::string name;
 public:
+	// Supongamos que queremos tener un contador del total de enemigos creados
 	Enemy()
 		: hp(0), attack(0), defense(0), name("Enemigo")
 	{
+		Count++; // Los miembros no estáticos SÍ pueden acceder a los miembros estáticos
 	}
 
 	Enemy(int hp, int attack, int defense, const std::string& name)
 		: hp(hp), attack(attack), defense(defense), name(name)
 	{
+		Count++;
 	}
 
 	Enemy(int hp, int attack, int defense)
 		: Enemy(hp, attack, defense, "Enemigo")
 	{
+	}
+
+	~Enemy()
+	{
+		Count--;
+	}
+
+	// Los métodos estáticos también utilizan la palabra reservada 'static'
+	static int GetTotalEnemies()
+	{
+		// ERROR: No se puede acceder a miembros no estáticos desde un método estático
+		// defense = 30;
+		// int hp = GetHp();
+		return Count; // Los métodos estáticos pueden acceder a los atributos estáticos
 	}
 
 	int GetHp()
@@ -90,19 +97,9 @@ public:
 		this->defense = defense;
 	}
 
-	/*
-	* Segunda forma de abstracción, reducimos un proceso complejo
-	* como el ataque de un enemigo, que muestra animaciones, partículas y afecta
-	* las estadísticas del enemigo, a una acción sencilla que es el método Attack()
-	*/
 	void Attack()
 	{
 		std::cout << "The Enemy " << name << " attacks with " << attack << " of power" << std::endl;
-		PlayAttackAnimation();
-		DisplayAttackParticles();
-		
-		if (defense > 0)
-			defense -= 1;
 	}
 
 	void Die()
@@ -116,26 +113,28 @@ public:
 			std::cout << "The Enemy " << name << " has " << hp << " HP" << std::endl;
 		}
 	}
-private:
-	void PlayAttackAnimation()
-	{
-		std::cout << "Attack animation" << std::endl;
-	}
-
-	void DisplayAttackParticles()
-	{
-		std::cout << "Displaying particles" << std::endl;
-	}
 };
+
+// Los atributos estáticos deben inicializarse fuera del cuerpo de la clase
+int Enemy::Count = 0;
 
 int main()
 {
-	Enemy enemigoA = Enemy(100, 20, 5, "Paul");
+	// Para acceder a los miembros estáticos se utiliza la clase en sí (Enemy), y el operador '::'
+	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
 
-	std::cout << "El enemigo A tiene " << enemigoA.GetDefense() << " de defensa" << std::endl;
-
-	// El complejo proceso del ataque se redujo a un simple método que el usuario puede utilizar
-	enemigoA.Attack();
+	Enemy enemigoA = Enemy(100, 20, 5);
+	Enemy enemigoB = Enemy(100, 20, 5);
 	
-	std::cout << "El enemigo A tiene " << enemigoA.GetDefense() << " de defensa" << std::endl;
+	// ERROR: Count es un atributo estático pero es privado también
+	// std::cout << "Hay un total de " << Enemy::Count << " enemigos" << std::endl;
+	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
+
+	{
+		Enemy enemigoC = Enemy(100, 20, 5);
+		Enemy enemigoD = Enemy(100, 20, 5);
+		std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
+	}
+	
+	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
 }
