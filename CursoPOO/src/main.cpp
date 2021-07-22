@@ -2,13 +2,32 @@
 #include <string>
 
 /*
-* En C++, la palabra reservada 'this', puede utilizarse dentro
-* de una clase y es un miembro privado y oculto que viene por
-* defecto con todas la clases
-*
-* Se trata de un puntero que hace referencia a la dirección de
-* memoria de la instancia actual
+* Abstracción:
+* 
+* El principio de abstracción en la Programación Orientada a Objetos
+* puede entenderse de dos manera
+* 
+* La primera es la abstracción de conceptos de la vida real, a datos que
+* una computadora, a través de la programación, puede entender
+* 
+* Por ejemplo, un Enemigo, para un videojuego, tiene puntos de salud, estadísticas de
+* ataque y defensa, además puede atacar y morir
+* 
+* Al convertir todas esas características y comportamientos en código para
+* un lenguaje de programación, estamos abstrayendo el concepto de Enemigo
+* a sus componentes más básicos, y utilizando sólo los que son relevantes para
+* nuestra aplicación
+* 
+* La segunda forma de entender la abstracción es como una manera de
+* simplificar un proceso complejo y resumirlo a una acción sencilla
+* 
+* Por ejemplo, al encender tu computadora, tú estás haciendo algo tan
+* sencillo como presionar el botón de encendido, pero no eres consciente
+* (y puede que ni siquiera sea relevante para ti) del complejo proceso de fondo:
+* consumir la energía, encender el procesador, iniciar el sistema operativo, etcétera
 */
+
+// Primera forma de abstracción: Reducimos un Enemigo a sus componentes y comportamientos básicos
 class Enemy
 {
 private:
@@ -42,9 +61,7 @@ public:
 		if (hp < 0)
 			return;
 		
-		// 'this' nos puede ser útil para distinguir entre los parámetros y los atributos de la clase
-		// hp = hp; // CONFUSIÓN! ¿Qué está pasando?
-		this->hp = hp; // Ya no hay confusión, pues el 'this' se refiere a la instancia actual
+		this->hp = hp;
 	}
 
 	int GetAttack()
@@ -73,9 +90,19 @@ public:
 		this->defense = defense;
 	}
 
+	/*
+	* Segunda forma de abstracción, reducimos un proceso complejo
+	* como el ataque de un enemigo, que muestra animaciones, partículas y afecta
+	* las estadísticas del enemigo, a una acción sencilla que es el método Attack()
+	*/
 	void Attack()
 	{
 		std::cout << "The Enemy " << name << " attacks with " << attack << " of power" << std::endl;
+		PlayAttackAnimation();
+		DisplayAttackParticles();
+		
+		if (defense > 0)
+			defense -= 1;
 	}
 
 	void Die()
@@ -89,21 +116,26 @@ public:
 			std::cout << "The Enemy " << name << " has " << hp << " HP" << std::endl;
 		}
 	}
+private:
+	void PlayAttackAnimation()
+	{
+		std::cout << "Attack animation" << std::endl;
+	}
+
+	void DisplayAttackParticles()
+	{
+		std::cout << "Displaying particles" << std::endl;
+	}
 };
 
 int main()
 {
 	Enemy enemigoA = Enemy(100, 20, 5, "Paul");
 
-	enemigoA.Attack();
-	enemigoA.Die();
-	
-	enemigoA.SetAttack(100);
-	enemigoA.SetDefense(-5);
-	enemigoA.SetHp(0);
-
 	std::cout << "El enemigo A tiene " << enemigoA.GetDefense() << " de defensa" << std::endl;
 
+	// El complejo proceso del ataque se redujo a un simple método que el usuario puede utilizar
 	enemigoA.Attack();
-	enemigoA.Die();
+	
+	std::cout << "El enemigo A tiene " << enemigoA.GetDefense() << " de defensa" << std::endl;
 }
