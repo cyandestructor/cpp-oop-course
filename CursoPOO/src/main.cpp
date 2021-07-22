@@ -2,57 +2,16 @@
 #include <string>
 
 /*
-* Pilares de la Programación Orientada a Objetos:
-*	+ Encapsulamiento
-*	+ Abstracción
-*	+ Herencia
-*	+ Polimorfismo
-* 
-* Se tratan de conceptos base de la POO, que describen
-* qué se puede hacer y cómo se sugiere usar este paradigma de programación
-*/
-
-/*
-* Encapsulamiento:
-* 
-* Este pilar de la Programación orientada a objetos se refiere
-* a las medidas que debemos tomar para cuidar el estado interno
-* de nuestros objetos
-* 
-* El estado interno se refiere a los datos internos que afectan el
-* funcionamiento de nuestros objetos, usualmente los atributos
-* 
-* Cuidar el estado interno se refiere a mantener los valores
-* de estos datos en valores válidos o esperados, para evitar
-* errores. Esto vuelve a nuestro código más robusto
-* 
-* Por ejemplo, una clase Enemy, tiene un atributo Hp. En este caso
-* cuidar su estado interno sería evitar que en cualquier momento el
-* valor del Hp sea negativo
-* 
-* Mantener el estado interno se logra a través de dos estrategias:
-* 'Data Hiding' u 'Ocultación de Información', y 'Data Protection' o
-* 'Protección de Información'
-* 
-* 'Data Hiding' se logra cuando los atributos de una clase están
-* ocultos o privados, y sólo es posible acceder a ellos a través de
-* una llamada intermedia, como un método público
-* 
-* Estos métodos públicos que sirven como intermediarios para
-* acceder a los atributos privados son comúnmente llamados 'getters'
-* y 'setters'
-* 
-* Los 'getters' sirven para obtener (get) la información, los 'setters'
-* sirven para modificar (set) la información.
-* 
-* Finalmente, 'Data Protection' se trata de acciones a tomar para
-* mantener los atributos siempre en valores válidos, usualmente
-* usando lógica de validación en los métodos 'setters'
+* En C++, la palabra reservada 'this', puede utilizarse dentro
+* de una clase y es un miembro privado y oculto que viene por
+* defecto con todas la clases
+*
+* Se trata de un puntero que hace referencia a la dirección de
+* memoria de la instancia actual
 */
 class Enemy
 {
 private:
-	// Como parte del principio de encapsulamiento, los atributos se vuelven privados
 	int hp;
 	int attack;
 	int defense;
@@ -73,24 +32,19 @@ public:
 	{
 	}
 
-	// Definimos los getters y setters públicos para los atributos
-	// Podemos escribir ambos para cada atributo, o sólo uno si
-	// queremos que sea sólo lectura o sólo escritura
-	// El estándar es usar la nomenclatura Get[Atributo] y Set[Atributo]
-
 	int GetHp()
 	{
 		return hp;
 	}
 	
-	// Nota que usamos el guión bajo como prefijo para evitar confusiones entre el parámetro y el atributo
-	void SetHp(int _hp)
+	void SetHp(int hp)
 	{
-		// Mira cómo usamos Data Protection para evitar que el Hp sea menor a 0
-		if (_hp < 0)
-			return; // Si el Hp que recibe es menor a 0, retorna sin modificar el atributo
+		if (hp < 0)
+			return;
 		
-		hp = _hp;
+		// 'this' nos puede ser útil para distinguir entre los parámetros y los atributos de la clase
+		// hp = hp; // CONFUSIÓN! ¿Qué está pasando?
+		this->hp = hp; // Ya no hay confusión, pues el 'this' se refiere a la instancia actual
 	}
 
 	int GetAttack()
@@ -98,12 +52,12 @@ public:
 		return attack;
 	}
 
-	void SetAttack(int _attack)
+	void SetAttack(int attack)
 	{
-		if (_attack < 0)
+		if (attack < 0)
 			return;
 		
-		attack = _attack;
+		this->attack = attack;
 	}
 
 	int GetDefense()
@@ -111,12 +65,12 @@ public:
 		return defense;
 	}
 
-	void SetDefense(int _defense)
+	void SetDefense(int defense)
 	{
-		if (_defense < 0)
+		if (defense < 0)
 			return;
 
-		defense = _defense;
+		this->defense = defense;
 	}
 
 	void Attack()
@@ -143,8 +97,6 @@ int main()
 
 	enemigoA.Attack();
 	enemigoA.Die();
-
-	// Accedemos a sus atributos usando los métodos públicos
 	
 	enemigoA.SetAttack(100);
 	enemigoA.SetDefense(-5);
