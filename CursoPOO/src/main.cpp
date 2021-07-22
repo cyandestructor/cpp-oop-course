@@ -2,60 +2,40 @@
 #include <string>
 
 /*
-* Los miembros estáticos de una clase, a diferencia de los miembros normales,
-* no están ligados a una instancia, sino a la clase en sí
+* Herencia:
 * 
-* Al estar ligados a la clase y no a una instancia, acceder a los miembros
-* estáticos no requiere un objeto, se accede a ellos directamente a través de la clase
+* El concepto de herencia en la Programación Orientada a Objetos se puede
+* describir como la posibilidad de crear jerarquías de clases, donde
+* existen clases base o super clases, y clases derivadas o sub clases
 * 
-* Además, si un método de una instancia afecta un atributo estático, este cambio
-* se verá reflejado para todas las instancias
-* 
-* Al no depender de una instancia, los métodos estáticos de una clase no pueden
-* acceder a los miembros no estáticos, ya sean atributos o métodos
+* Las clases derivadas heredan, es decir, reciben los atributos y métodos
+* de su clase base. Esta característica permite la reutilización de código
 */
-class Enemy
+
+class Enemy // Clase Base
 {
 private:
-	// Los miembros estáticos también son afectados por los modificadores de acceso
-	// Para declarar un miembro estático se utiliza la palabra reservada 'static'
-	static int Count;
-
 	int hp;
 	int attack;
 	int defense;
 	std::string name;
 public:
-	// Supongamos que queremos tener un contador del total de enemigos creados
 	Enemy()
 		: hp(0), attack(0), defense(0), name("Enemigo")
 	{
-		Count++; // Los miembros no estáticos SÍ pueden acceder a los miembros estáticos
+		std::cout << "Constructor de Enemy" << std::endl;
 	}
 
 	Enemy(int hp, int attack, int defense, const std::string& name)
 		: hp(hp), attack(attack), defense(defense), name(name)
 	{
-		Count++;
+		std::cout << "Constructor de Enemy" << std::endl;
 	}
 
 	Enemy(int hp, int attack, int defense)
 		: Enemy(hp, attack, defense, "Enemigo")
 	{
-	}
-
-	~Enemy()
-	{
-		Count--;
-	}
-
-	// Los métodos estáticos también utilizan la palabra reservada 'static'
-	static int GetTotalEnemies()
-	{
-		// ERROR: No se puede acceder a miembros no estáticos desde un método estático
-		// defense = 30;
-		// int hp = GetHp();
-		return Count; // Los métodos estáticos pueden acceder a los atributos estáticos
+		std::cout << "Constructor de Enemy" << std::endl;
 	}
 
 	int GetHp()
@@ -115,26 +95,76 @@ public:
 	}
 };
 
-// Los atributos estáticos deben inicializarse fuera del cuerpo de la clase
-int Enemy::Count = 0;
+// Skeleton es una clase derivada de Enemy
+// La sintaxis de la herencia es C++ es la siguiente:
+// class Derived : public Base
+class Skeleton : public Enemy
+{
+private:
+	// La clase derivada puede tener sus propios atributos y métodos
+	int arrows;
+
+public:
+
+	Skeleton()
+		:arrows(0)
+	{
+		std::cout << "Constructor de Skeleton" << std::endl;
+	}
+	
+	// Una clase derivada puede acceder al constructor de su clase base
+	// a través de una lista inicializadora y además inicializar sus propios atributos
+	Skeleton(int hp, int attack, int defense)
+		:Enemy(hp, attack, defense), arrows(0)
+	{
+		std::cout << "Constructor de Skeleton" << std::endl;
+	}
+
+	int GetArrows()
+	{
+		return arrows;
+	}
+
+	void SetArrows(int arrows)
+	{
+		this->arrows = arrows;
+	}
+
+	void Shoot()
+	{
+		if (arrows > 0)
+		{
+			std::cout << "El Esqueleto dispara una flecha" << std::endl;
+			arrows--;
+		}
+		else
+		{
+			std::cout << "El Esqueleto no tiene flechas" << std::endl;
+			
+			// ERROR: Skeleton SÍ hereda el atributo hp de Enemy, pero éste es private
+			// por lo tanto NO es accesible
+			// this->hp = 5;
+			
+			// CORRECTO: Skeleton hereda los métodos de Enemy, y al ser SetHp público, es accesible
+			// SetHp(5);
+		}
+	}
+};
 
 int main()
 {
-	// Para acceder a los miembros estáticos se utiliza la clase en sí (Enemy), y el operador '::'
-	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
+	// Nota lo que pasa cuando se instancia la clase Skeleton
+	// El constructor de Enemy se ejecuta primero y luego
+	// el constructor de Skeleton
+	Skeleton* esqueletoA = new Skeleton();
 
-	Enemy enemigoA = Enemy(100, 20, 5);
-	Enemy enemigoB = Enemy(100, 20, 5);
-	
-	// ERROR: Count es un atributo estático pero es privado también
-	// std::cout << "Hay un total de " << Enemy::Count << " enemigos" << std::endl;
-	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
+	// Con un objeto de la clase Skeleton, podemos acceder a miembros
+	// tanto de Skeleton como de su clase base Enemy
+	esqueletoA->SetAttack(30);
+	esqueletoA->SetArrows(20);
 
-	{
-		Enemy enemigoC = Enemy(100, 20, 5);
-		Enemy enemigoD = Enemy(100, 20, 5);
-		std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
-	}
-	
-	std::cout << "Hay un total de " << Enemy::GetTotalEnemies() << " enemigos" << std::endl;
+	esqueletoA->Attack();
+	esqueletoA->Shoot();
+
+	delete esqueletoA;
 }
