@@ -2,42 +2,51 @@
 #include <string>
 
 /*
-* Una forma más limpia y eficiente de inicializar los atributos
-* de una clase es con una 'initializer list' o lista inicializadora
+* Los modificadores de acceso son importantes para proteger los datos
+* de nuestros objetos
+* 
+* En C++ existen tres modificadores de acceso:
+*	+ public
+*	+ private
+*	+ protected
+* 
+* Revisaremos el modificador de acceso protected más adelante, vamos a enfocarnos en
+* los dos principales, public y private
 */
 class Enemy
 {
-public:
+private:
+	/*
+	* El modificador de acceso private vuelve los miembros privados,
+	* lo que significa que sólo se puede acceder a ellos dentro del código
+	* de la clase, como en sus métodos
+	* 
+	* Los miembros private NO pueden ser accedidos a través de un
+	* objeto o instancia
+	*/
 	int Hp;
 	int AttackPower;
 	int Defense;
 	std::string Name;
-
-	// Usamos una lista inicializadora para inicializar los atributos
+public:
+	/*
+	* El modificador de acceso public vuelve los miembros públicos,
+	* lo que significa que se puede acceder a ellos desde dentro del
+	* código de la clase, o desde afuera a través de una instancia
+	* u objeto
+	*/
 	Enemy()
 		: Hp(0), AttackPower(0), Defense(0), Name("Enemigo")
 	{
 		std::cout << "Ejecutando el constructor" << std::endl;
-
-		// Ya no es necesario inicializarlos aquí
-		/*Hp = 0;
-		AttackPower = 0;
-		Defense = 0;
-		Name = "Enemigo";*/
 	}
 
-	// También se puede usar la lista inicializadora con los parámetros del constructor
-
-	// Constructor A
 	Enemy(int hp, int attack, int defense, const std::string& name)
 		: Hp(hp), AttackPower(attack), Defense(defense), Name(name)
 	{
 		std::cout << "Ejecutando el constructor A" << std::endl;
 	}
 
-	// Además se puede llamar de un constructor a otro en la lista inicializadora
-
-	// Constructor B
 	Enemy(int hp, int attack, int defense)
 		: Enemy(hp, attack, defense, "Enemigo")
 	{
@@ -70,20 +79,23 @@ public:
 int main()
 {
 	std::cout << "Enemigo A" << std::endl;
-	{
-		Enemy enemigoA = Enemy(100, 20, 5);
+	Enemy enemigoA = Enemy(100, 20, 5);
 
-		enemigoA.Attack();
-		enemigoA.Die();
-	}
+	// Name es private, por lo que no se puede acceder a él a través de la instancia
+	// enemigoA.Name = "Mike";
 
-	std::cout << std::endl;
-	std::cout << "Enemigo B" << std::endl;
-
-	Enemy* enemigoB = new Enemy(0, 35, 10, "Paul");
-
-	enemigoB->Attack();
-	enemigoB->Die();
-
-	delete enemigoB;
+	// Attack() y Die() son miembros públicos, por lo que podemos acceder a ellos a través del objeto
+	enemigoA.Attack();
+	enemigoA.Die();
 }
+
+// TABLA DE ACCESO
+
+/*
+* MODIFICADOR DE ACCESO	|	ACCESIBLE DESDE...		|
+* ----------------------+---------------------------+
+*						|	CLASE	|	INSTANCIA	|
+* ----------------------+-----------+---------------+
+* public				|	O		|	O			|
+* private				|	O		|				|
+*/
