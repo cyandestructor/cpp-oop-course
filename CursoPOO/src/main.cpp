@@ -2,289 +2,112 @@
 #include <string>
 
 /*
-* Polimorfismo:
+* Amistad:
 * 
-* El último principio de la Programación Orientada a Objetos es
-* el Polimorfismo
+* La amistad entre clases es un concepto que existe en C++
 * 
-* La raíz etimológica de Polimorfismo es la siguiente:
-* Poli - múltiple
-* Morfismo - forma
-* Es decir, múltiples formas
+* Ésta consiste en que una clase le concede a otra la posibilidad
+* de acceder a todos sus miembros, independientemente del modificador de acceso.
+* Esta clase que obtiene acceso se vuelve amiga de la primera clase
 * 
-* El polimorfismo se refiere a que un objeto de una clase derivada
-* puede ser usado de otra forma como un objeto de alguna de las clases
-* que están por encima suyo en la jerarquía de clases
+* La amistad es un concepto poco común, que si bien ayuda a resolver ciertos
+* problemas, puede llegar a considerse que rompe algunos principios de la
+* Programación Orientada a Objetos, por lo que es recomendable usarla sólo
+* en casos muy específicos
 * 
-* Para lograr que esto funcione, es clave entender el principio
-* de herencia que ya hemos visto anteriormente
+* La amistad tiene las siguientes características:
 * 
-* Para alcanzar el máximo potencial del polimorfismo, utilizamos
-* métodos virtuales y la sobreescritura de métodos
+*	NO es recíproca
+*		Si una Clase A declara una Clase B como su amiga, A no es
+*		necesariamente amiga de B
 * 
-* Sobreescribir un método es la acción de crear un método en una
-* clase derivada que tenga el mismo nombre, tipo de retorno y
-* parámetros, que otro método de su clase base
+*	NO es heredable
+*		Si una Clase A declara una Clase B como su amiga, las clases
+*		derivadas de A, no necesariamente tienen a B como su amiga
 * 
-* Con el polimorfismo, un método de una clase base puede
-* tener una diferente implementación si una clase derivada
-* lo sobreescribe
+*	NO se comparte
+*		Si una Clase A declara una Clase B como su amiga, y una Clase C
+*		declara B como su amiga, no existe ninguna relación entre A y C
 * 
-* Básicamente, si un método es virtual y es sobreescrito,
-* se ejecutará la sobreescritura por encima del método original,
-* si no hubiera una sobreescritura, se ejecutaría el método original
+* Una función también puede ser amiga de una clase, y tiene el mismo efecto,
+* esta función podrá acceder a todos los miembros de esa clase
 */
 
-/*
-* Destructores virtuales:
-* 
-* Los destructores virtuales son muy importantes para
-* implementar correctamente el polimorfismo
-* 
-* Cuando tratamos un objeto de una clase derivada, como
-* uno de su clase base (polimorfismo), si éste objeto se destruye,
-* por defecto únicamente se destruye la parte que corresponde
-* a la clase base, por lo que no se libera la memoria
-* reservada para la parte de la clase derivada
-* 
-* Lo anterior puede causar 'memory leaks' o fugas de memoria
-* en nuestro programa, es decir, cuando una memoria que
-* reservamos no es propiamente liberada
-* 
-* Al hacer el destructor de la clase base un destructor virtual,
-* ahora cuando un objeto se destruya de manera polimórfica,
-* la memoria se liberara correctamente, ejecutando además
-* del destructor base, el destructor derivado
-*/
-
-class Enemy
+class Soldier
 {
-protected:
-	int hp;
-	int attack;
-	int defense;
-	std::string name;
+	// Declaramos una clase Medic como amiga de Soldier, Medic puede acceder a Soldier pero no al revés
+	friend class Medic;
+	// Declaramos la función ReviveSoldier como amiga de Soldier, ReviveSoldier puede acceder a Soldier
+	friend void ReviveSoldier(Soldier& soldier, int hp);
 public:
-	Enemy()
-		: hp(0), attack(0), defense(0), name("Enemigo")
+	Soldier(int hp)
+		:hp(hp)
 	{
-		std::cout << "Constructor de Enemy" << std::endl;
 	}
-
-	Enemy(int hp, int attack, int defense, const std::string& name)
-		: hp(hp), attack(attack), defense(defense), name(name)
-	{
-		std::cout << "Constructor de Enemy" << std::endl;
-	}
-
-	Enemy(int hp, int attack, int defense)
-		: Enemy(hp, attack, defense, "Enemigo")
-	{
-		std::cout << "Constructor de Enemy" << std::endl;
-	}
-
-	// Para hacer un destructor virtual, simplemente usamos la palabra reservada 'virtual'
-	virtual ~Enemy()
-	{
-		std::cout << "Destructor de Enemy" << std::endl;
-	}
-
-	// Intercambia ambas versiones del destructor para ver el comportamiento de un caso frente a otro
-	/*~Enemy()
-	{
-		std::cout << "Destructor de Enemy" << std::endl;
-	}*/
 
 	int GetHp()
 	{
 		return hp;
 	}
-	
-	void SetHp(int hp)
-	{
-		if (hp < 0)
-			return;
-		
-		this->hp = hp;
-	}
 
-	int GetAttack()
-	{
-		return attack;
-	}
-
-	void SetAttack(int attack)
-	{
-		if (attack < 0)
-			return;
-		
-		this->attack = attack;
-	}
-
-	int GetDefense()
-	{
-		return defense;
-	}
-
-	void SetDefense(int defense)
-	{
-		if (defense < 0)
-			return;
-
-		this->defense = defense;
-	}
-
-	// Los métodos que queramos que una clase derivada pueda sobreescribir
-	// deben ser definidos con la palabra reservada 'virtual'
-	virtual void Attack()
-	{
-		// Si una clase derivada ejecuta de manera polimórfica este método
-		// Ejecutará el original si la clase no lo sobreescribió o
-		// Ejecutará la sobreescritura
-		std::cout << "The Enemy " << name << " attacks with " << attack << " of power" << std::endl;
-	}
-
-	// Intercambia ambas versiones del método para ver el comportamiento de un caso frente a otro
-	/*void Attack()
-	{
-		std::cout << "The Enemy " << name << " attacks with " << attack << " of power" << std::endl;
-	}*/
-};
-
-class Skeleton : public Enemy
-{
 private:
-	int arrows;
+	int hp;
+};
 
+class Medic
+{
+	// Medic es amiga de Soldier, pero Soldier no es amiga de Medic
 public:
-	Skeleton()
-		:arrows(0)
+	void Heal(Soldier& soldier, int hp)
 	{
-		std::cout << "Constructor de Skeleton" << std::endl;
-	}
-
-	Skeleton(int hp, int attack, int defense, const std::string& name)
-		:Enemy(hp, attack, defense, name), arrows(0)
-	{
-		std::cout << "Constructor de Skeleton" << std::endl;
-	}
-
-	int GetArrows()
-	{
-		return arrows;
-	}
-
-	void SetArrows(int arrows)
-	{
-		if (arrows < 0)
-			return;
-
-		this->arrows = arrows;
-	}
-
-	// Estamos sobreescribiendo el método Attack() de Enemy para que tenga una diferente implementación
-	void Attack()
-	{
-		if (arrows > 0) {
-			std::cout << "The Skeleton " << name << " shoots with " << attack << " of power" << std::endl;
-			arrows--;
-		}
+		soldier.hp += hp; // Como Medic es amiga de Soldier, puede acceder a sus miembros privados
 	}
 };
 
-class Mummy : public Enemy
+void ReviveSoldier(Soldier& soldier, int hp)
 {
-private:
-	int mana;
-
-public:
-	Mummy()
-		:mana(0)
+	// Como ReviveSoldier es amiga de Soldier, puede acceder a sus miembros privados
+	if (soldier.hp <= 0)
 	{
-		std::cout << "Constructor de Mummy" << std::endl;
+		soldier.hp = hp;
 	}
-
-	Mummy(int hp, int attack, int defense, const std::string& name)
-		:Enemy(hp, attack, defense, name), mana(0)
-	{
-		std::cout << "Constructor de Mummy" << std::endl;
-	}
-
-	~Mummy()
-	{
-		std::cout << "Destructor de Mummy" << std::endl;
-	}
-
-	int GetMana()
-	{
-		return mana;
-	}
-
-	void SetMana(int mana)
-	{
-		if (mana < 0)
-			return;
-
-		this->mana = mana;
-	}
-
-	// Otra forma de sobreescribir un método es la siguiente:
-	// 
-	// Con la palabra reservada 'virtual', que sólo es un indicador, pues de cualquier forma se vuelve
-	// un método virtual por defecto
-
-	// Con la palabra resevada 'override', que de nuevo es sólo un indicador, pues es opcional
-	// 'override' es útil, pues marca un error de compilación si queremos sobreescribir un método
-	// que de principio no es virtual o no pertenece a la clase base
-	virtual void Attack() override
-	{
-		if (mana > 0) {
-			std::cout << "The Mummy " << name << " fires magic with " << attack << " of power" << std::endl;
-			mana--;
-		}
-	}
-};
-
-void EjemploDestructores()
-{
-	std::cout << "Constructor:" << std::endl;
-	// Observa el orden en que se ejecutan el constructor de la clase base y la derivada
-	Enemy* momia = new Mummy(100, 40, 20, "Momia");
-	// Observa el orden en que se ejecutan el destructor de la clase base y la derivada
-	std::cout << std::endl << "Destructor:" << std::endl;
-	delete momia;
-}
-
-void EjemploPolimorfismo()
-{
-	// *** Creamos "referencias" a instancias de una clase derivada
-	Mummy* momia = new Mummy(100, 40, 20, "Momia");
-	momia->SetMana(5);
-
-	Skeleton* esqueleto = new Skeleton(100, 20, 5, "Esqueleto");
-	esqueleto->SetArrows(50);
-	// ***
-
-	// Podemos ver que una "referencia" a una instancia de una clase base,
-	// también puede hacer referencia a un objeto de una clase derivada
-	Enemy* enemigos[2];
-	enemigos[0] = momia;
-	enemigos[1] = esqueleto;
-
-	for (int i = 0; i < 2; i++)
-	{
-		// Estamos ejecutando el método Attack() de manera polimórfica
-		// Si una clase derivada sobreescribió el método virtual Attack(),
-		// ejecutará esa versión, en cambio, ejecutará el método original
-		enemigos[i]->Attack();
-	}
-
-	delete momia;
-	delete esqueleto;
 }
 
 int main()
 {
-	EjemploDestructores();
-	// EjemploPolimorfismo();
+	Soldier soldado(5);
+	Medic medico;
+
+	std::cout << "La vida del soldado es " << soldado.GetHp() << std::endl;
+
+	std::cout << "El medico cura al soldado 5 de HP" << std::endl;
+
+	medico.Heal(soldado, 5);
+
+	std::cout << "La vida del soldado es " << soldado.GetHp() << std::endl << std::endl;
+
+	////////////////
+
+	Soldier soldadoB(0);
+	std::cout << "La vida del soldado B es " << soldadoB.GetHp() << std::endl;
+	
+	std::cout << "Reviviendo al soldado B con 10 Hp" << std::endl;
+	ReviveSoldier(soldadoB, 10);
+
+	std::cout << "La vida del soldado B es " << soldadoB.GetHp() << std::endl;
 }
+
+/*
+* ¿Cuándo usar amistad?
+* 
+* Muchos cuestionan si es correcto o no utilizar la amistad.
+* Fuera de cualquier discusión, lo cierto es que es una estrategia válida,
+* aunque debe moderarse su utilización
+* 
+* Si se opta por utilizar amistad, es recomendable que se utilice sólamente
+* con clases estrechamente relacionadas. Tal vez, un sistema
+* complejo es mejor dividirlo en algunas clases; sin embargo, formarán parte
+* de una unidad, y no son piezas independientes, pero al mismo tiempo
+* se quiere aislar al sistema de lo que hay fuera de él y sus clases.
+* En estos casos es válido utilizar la amistad
+*/
