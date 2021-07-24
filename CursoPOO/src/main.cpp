@@ -2,99 +2,88 @@
 #include <string>
 
 /*
-* Interfaces:
+* Métodos constantes y atributos 'mutable':
 * 
-* Las interfaces son casos especiales de clases. En algunos lenguajes
-* de programación, incluso son considerados conceptos distintos
+* Los métodos constantes son métodos que se pueden utilizar
+* a través de un objeto o instancia constante de la clase,
+* por lo tanto, pueden leer los atributos y ejecutar
+* otros métodos constantes, pero no pueden modificar esos
+* atributos, ni ejecutar métodos no constantes
 * 
-* En C++, las interfaces son clases que únicamente tienen métodos
-* virtuales puros y públicos
+* Es recomendable siempre tener en cuenta qué métodos no
+* alteran los datos de la instancia y marcarlos como constantes
 * 
-* Si bien, en cuestión de sintaxis, una clase hereda de una interfaz
-* como cualquier otra clase, el término correcto es 'implementar'. Una
-* clase implementa una interfaz
+* Ahora bien, hay casos en los que en un método constante,
+* se necesita modificar un valor que está dentro de la clase,
+* pero que no necesariamente está relacionada a la instancia
 * 
-* La interfaces funcionan como un contrato, al cual se suscriben
-* las clases que las implementan. El contrato obliga a las clases
-* a implementar todos los métodos de la interfaz
+* Por ejemplo, para un debug, tal vez queremos tener
+* una cuenta de cuántas veces se ejecutó determinado método
+* que puede ser constante
 * 
-* El polimorfismo también ocurre a través de interfaces, pues
-* para el lenguaje de programación es una clase como cualquier otra
-* 
-* En C++ existe la herencia múltiple, pero no es recomendable utilizarla
-* con clases normales o abstractas. No obstante, implementar múltiples
-* interfaces es común en la Programación Orientada a Objetos
+* En estos casos es conveniente declarar los atributos
+* que se podrán modificar como 'mutable' es decir, como
+* modificables. De esta forma se permitirá modificarlos
+* en métodos constantes
 */
 
-// Crearemos una interfaz: Drawable
-// Ésta compuesta únicamente de métodos virtuales puros y públicos
-class Drawable
+class Monster
 {
 public:
-	virtual void Draw() = 0;
-};
+	Monster(int hp)
+		:hp(hp), hpCounter(0) {}
 
-// Segundo ejemplo de interfaz
-class Printable
-{
-public:
-	virtual std::string Print() = 0;
-};
+	Monster()
+		:Monster(0) {}
 
-/*
-* Ahora haremos que una clase, Model implemente las interfaces Drawable y Printable
-* 
-* Model tiene que implementar los métodos de las interfaces
-* 
-* Nota cómo funciona la herencia múltiple, simplemente separando cada herencia con una coma.
-* Recuerda que ésto sólamente es recomendable para implementar múltiples interfaces
-*/
-class Model : public Drawable, public Printable
-{
-	virtual void Draw() override
+	void SetHp(int hp)
 	{
-		std::cout << "Drawing model" << std::endl;
+		if (hp < 0)
+			return;
+
+		this->hp = hp;
 	}
 
-	virtual std::string Print() override
+	// Para declarar un método como constante, usamos la palabra
+	// reservada 'const' después de la declaración del método y antes del cuerpo
+	int GetHp() const
 	{
-		return "Model";
-	}
-};
+		// ERROR:
+		// GetHp() es un método constante, por lo tanto no puede modificar los atributos
+		// hp = 5;
 
-// Segundo ejemplo de una clase que implementa las interfaces
-class Terrain : public Drawable, public Printable
-{
-	virtual void Draw() override
-	{
-		std::cout << "Drawing terrain" << std::endl;
+		// Si queremos que modifique el valor de hpCounter, debemos declararlo como 'mutable'
+		hpCounter++;
+		return hp;
 	}
 
-	virtual std::string Print() override
+	int GetHpCounter() const
 	{
-		return "Terrain";
+		return hpCounter;
 	}
+
+private:
+	int hp;
+	// Con la palabra reservada 'mutable' declaramos un atributo como modificable o mutable
+	mutable int hpCounter;
+
+	// Intercambia la declaración del atributo para ver la diferencia
+	// int hpCounter;
 };
 
 int main()
 {
-	Model model;
-	Terrain terrain;
+	// Creamos una instancia constante de la clase Monster con la palabra reservada 'const'
+	const Monster monster(50);
 
-	// Creamos un arreglo de referencias (punteros), para todos los drawable y printable
-	Drawable* drawables[] { &model, &terrain };
-	Printable* printables[] { &model, &terrain };
+	// ERROR: A través de una instancia constante, no podemos acceder a métodos no constantes
+	// monster.SetHp(60);
 
-	// Nota cómo en los siguientes ejemplos, el polimorfismo funciona igual a los ejemplos anteriores
-	std::cout << "Dibujando:" << std::endl;
-	for (Drawable* drawable : drawables)
-	{
-		drawable->Draw();
-	}
+	// GetHP() es un método constante, por lo que se puede usar a través de una instancia constante
+	std::cout << "El monstruo tiene " << monster.GetHp() << " de Hp" << std::endl;
+	std::cout << "El monstruo tiene " << monster.GetHp() << " de Hp" << std::endl;
+	std::cout << "El monstruo tiene " << monster.GetHp() << " de Hp" << std::endl;
+	std::cout << "El monstruo tiene " << monster.GetHp() << " de Hp" << std::endl << std::endl;
 
-	std::cout << std::endl << "Imprimiendo:" << std::endl;
-	for (Printable* printable : printables)
-	{
-		std::cout << "Imprimiendo: " << printable->Print() << std::endl;
-	}
+	std::cout << "Se llamo el metodo GetHp() " << monster.GetHpCounter() << " veces" << std::endl;
 }
