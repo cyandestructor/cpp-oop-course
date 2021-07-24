@@ -2,46 +2,61 @@
 #include <string>
 
 /*
-* Amistad:
+* Métodos virtuales puros y Clases Abstractas:
 * 
-* La amistad entre clases es un concepto que existe en C++
+* Volvamos al ejemplo de los Enemigos, el Esqueleto y la Momia
 * 
-* Ésta consiste en que una clase le concede a otra la posibilidad
-* de acceder a todos sus miembros, independientemente del modificador de acceso.
-* Esta clase que obtiene acceso se vuelve amiga de la primera clase
+* Queremos tener Esqueletos y Momias, y que ambos puedan ser
+* tratados como un Enemigo (polimorfismo). Por eso, Skeleton y Mummy
+* son clases derivadas de Enemy
 * 
-* La amistad es un concepto poco común, que si bien ayuda a resolver ciertos
-* problemas, puede llegar a considerse que rompe algunos principios de la
-* Programación Orientada a Objetos, por lo que es recomendable usarla sólo
-* en casos muy específicos
+* Sin embargo, no tiene sentido poder crear instancias de un Enemy, porque,
+* ¿qué es un Enemy? ¿Cómo se ve? ¿Cómo debería atacar?
 * 
-* La amistad tiene las siguientes características:
+* A diferencia de Skeleton o Mummy, Enemy es un concepto abstracto. Queremos
+* que clases puedan heredar atributos y comportamientos de Enemy, pero no
+* queremos que existan objetos de Enemy como tal, pues no tiene sentido. Ahí
+* es donde entran las clases abstractas
 * 
-*	NO es recíproca
-*		Si una Clase A declara una Clase B como su amiga, A no es
-*		necesariamente amiga de B
+* Para entender las clases abstractas tenemos que saber qué es un método virtual puro
 * 
-*	NO es heredable
-*		Si una Clase A declara una Clase B como su amiga, las clases
-*		derivadas de A, no necesariamente tienen a B como su amiga
+* Un método virtual puro es un método como cualquier otro, pero que no tiene un cuerpo,
+* es decir, no se implementa. Es reponsabilidad de las clases derivadas implementar y darle
+* un cuerpo a los métodos virtuales puros que heredan
 * 
-*	NO se comparte
-*		Si una Clase A declara una Clase B como su amiga, y una Clase C
-*		declara B como su amiga, no existe ninguna relación entre A y C
+* Es así que una clase abstracta es una clase que tiene al menos un método virtual puro.
+* El efecto de esto es que no se puede instanciar una clase abstracta por sí misma, sólo alguna
+* clase derivada si es que implementa todos los métodos virtuales puros de su base
 * 
-* Una función también puede ser amiga de una clase, y tiene el mismo efecto,
-* esta función podrá acceder a todos los miembros de esa clase
+* Finalmente, es importante decir que, si una clase derivada no implementa alguno de
+* los métodos virtuales puros de su base, ésta clase derivada también será una clase abstracta
 */
 
-class Soldier
+// Vamos a convertir Enemy en una clase abstracta
+class Enemy
 {
-	// Declaramos una clase Medic como amiga de Soldier, Medic puede acceder a Soldier pero no al revés
-	friend class Medic;
-	// Declaramos la función ReviveSoldier como amiga de Soldier, ReviveSoldier puede acceder a Soldier
-	friend void ReviveSoldier(Soldier& soldier, int hp);
+protected:
+	int hp;
+	int attack;
+	int defense;
+	std::string name;
 public:
-	Soldier(int hp)
-		:hp(hp)
+	Enemy()
+		: hp(0), attack(0), defense(0), name("Enemigo")
+	{
+	}
+
+	Enemy(int hp, int attack, int defense, const std::string& name)
+		: hp(hp), attack(attack), defense(defense), name(name)
+	{
+	}
+
+	Enemy(int hp, int attack, int defense)
+		: Enemy(hp, attack, defense, "Enemigo")
+	{
+	}
+
+	virtual ~Enemy()
 	{
 	}
 
@@ -50,64 +65,147 @@ public:
 		return hp;
 	}
 
+	void SetHp(int hp)
+	{
+		if (hp < 0)
+			return;
+
+		this->hp = hp;
+	}
+
+	int GetAttack()
+	{
+		return attack;
+	}
+
+	void SetAttack(int attack)
+	{
+		if (attack < 0)
+			return;
+
+		this->attack = attack;
+	}
+
+	int GetDefense()
+	{
+		return defense;
+	}
+
+	void SetDefense(int defense)
+	{
+		if (defense < 0)
+			return;
+
+		this->defense = defense;
+	}
+
+	// Para declarar un método virtual puro, usamos la palabra derivada 'virtual'
+	// y además, en vez de su cuerpo, escribimos '= 0;'
+	virtual void Attack() = 0;
+};
+
+class Skeleton : public Enemy
+{
 private:
-	int hp;
-};
+	int arrows;
 
-class Medic
-{
-	// Medic es amiga de Soldier, pero Soldier no es amiga de Medic
 public:
-	void Heal(Soldier& soldier, int hp)
+	Skeleton()
+		:arrows(0)
 	{
-		soldier.hp += hp; // Como Medic es amiga de Soldier, puede acceder a sus miembros privados
+	}
+
+	Skeleton(int hp, int attack, int defense, const std::string& name)
+		:Enemy(hp, attack, defense, name), arrows(0)
+	{
+	}
+
+	int GetArrows()
+	{
+		return arrows;
+	}
+
+	void SetArrows(int arrows)
+	{
+		if (arrows < 0)
+			return;
+
+		this->arrows = arrows;
+	}
+
+	// Implementamos el método virtual puro Attack(), de lo contrario
+	// Skeleton seguirá siendo una clase abstracta
+	virtual void Attack() override
+	{
+		if (arrows > 0) {
+			std::cout << "The Skeleton " << name << " shoots with " << attack << " of power" << std::endl;
+			arrows--;
+		}
 	}
 };
 
-void ReviveSoldier(Soldier& soldier, int hp)
+class Mummy : public Enemy
 {
-	// Como ReviveSoldier es amiga de Soldier, puede acceder a sus miembros privados
-	if (soldier.hp <= 0)
+private:
+	int mana;
+
+public:
+	Mummy()
+		:mana(0)
 	{
-		soldier.hp = hp;
 	}
-}
+
+	Mummy(int hp, int attack, int defense, const std::string& name)
+		:Enemy(hp, attack, defense, name), mana(0)
+	{
+	}
+
+	int GetMana()
+	{
+		return mana;
+	}
+
+	void SetMana(int mana)
+	{
+		if (mana < 0)
+			return;
+
+		this->mana = mana;
+	}
+
+	// Implementamos el método virtual puro Attack(), de lo contrario
+	// Mummy seguirá siendo una clase abstracta
+	virtual void Attack() override
+	{
+		if (mana > 0) {
+			std::cout << "The Mummy " << name << " fires magic with " << attack << " of power" << std::endl;
+			mana--;
+		}
+	}
+};
 
 int main()
 {
-	Soldier soldado(5);
-	Medic medico;
+	// ERROR: No se puede instanciar una clase abstracta
+	// Enemy* enemigo = new Enemy();
 
-	std::cout << "La vida del soldado es " << soldado.GetHp() << std::endl;
+	// *** Ejemplo que ya vimos del polimorfismo
+	Mummy* momia = new Mummy(100, 40, 20, "Momia");
+	momia->SetMana(5);
 
-	std::cout << "El medico cura al soldado 5 de HP" << std::endl;
+	Skeleton* esqueleto = new Skeleton(100, 20, 5, "Esqueleto");
+	esqueleto->SetArrows(50);
 
-	medico.Heal(soldado, 5);
+	Enemy* enemigos[2];
+	enemigos[0] = momia;
+	enemigos[1] = esqueleto;
 
-	std::cout << "La vida del soldado es " << soldado.GetHp() << std::endl << std::endl;
+	for (int i = 0; i < 2; i++)
+	{
+		enemigos[i]->Attack();
+	}
 
-	////////////////
-
-	Soldier soldadoB(0);
-	std::cout << "La vida del soldado B es " << soldadoB.GetHp() << std::endl;
-	
-	std::cout << "Reviviendo al soldado B con 10 Hp" << std::endl;
-	ReviveSoldier(soldadoB, 10);
-
-	std::cout << "La vida del soldado B es " << soldadoB.GetHp() << std::endl;
+	delete momia;
+	delete esqueleto;
+	// ***
 }
-
-/*
-* ¿Cuándo usar amistad?
-* 
-* Muchos cuestionan si es correcto o no utilizar la amistad.
-* Fuera de cualquier discusión, lo cierto es que es una estrategia válida,
-* aunque debe moderarse su utilización
-* 
-* Si se opta por utilizar amistad, es recomendable que se utilice sólamente
-* con clases estrechamente relacionadas. Tal vez, un sistema
-* complejo es mejor dividirlo en algunas clases; sin embargo, formarán parte
-* de una unidad, y no son piezas independientes, pero al mismo tiempo
-* se quiere aislar al sistema de lo que hay fuera de él y sus clases.
-* En estos casos es válido utilizar la amistad
-*/
