@@ -2,210 +2,99 @@
 #include <string>
 
 /*
-* Métodos virtuales puros y Clases Abstractas:
+* Interfaces:
 * 
-* Volvamos al ejemplo de los Enemigos, el Esqueleto y la Momia
+* Las interfaces son casos especiales de clases. En algunos lenguajes
+* de programación, incluso son considerados conceptos distintos
 * 
-* Queremos tener Esqueletos y Momias, y que ambos puedan ser
-* tratados como un Enemigo (polimorfismo). Por eso, Skeleton y Mummy
-* son clases derivadas de Enemy
+* En C++, las interfaces son clases que únicamente tienen métodos
+* virtuales puros y públicos
 * 
-* Sin embargo, no tiene sentido poder crear instancias de un Enemy, porque,
-* ¿qué es un Enemy? ¿Cómo se ve? ¿Cómo debería atacar?
+* Si bien, en cuestión de sintaxis, una clase hereda de una interfaz
+* como cualquier otra clase, el término correcto es 'implementar'. Una
+* clase implementa una interfaz
 * 
-* A diferencia de Skeleton o Mummy, Enemy es un concepto abstracto. Queremos
-* que clases puedan heredar atributos y comportamientos de Enemy, pero no
-* queremos que existan objetos de Enemy como tal, pues no tiene sentido. Ahí
-* es donde entran las clases abstractas
+* La interfaces funcionan como un contrato, al cual se suscriben
+* las clases que las implementan. El contrato obliga a las clases
+* a implementar todos los métodos de la interfaz
 * 
-* Para entender las clases abstractas tenemos que saber qué es un método virtual puro
+* El polimorfismo también ocurre a través de interfaces, pues
+* para el lenguaje de programación es una clase como cualquier otra
 * 
-* Un método virtual puro es un método como cualquier otro, pero que no tiene un cuerpo,
-* es decir, no se implementa. Es reponsabilidad de las clases derivadas implementar y darle
-* un cuerpo a los métodos virtuales puros que heredan
-* 
-* Es así que una clase abstracta es una clase que tiene al menos un método virtual puro.
-* El efecto de esto es que no se puede instanciar una clase abstracta por sí misma, sólo alguna
-* clase derivada si es que implementa todos los métodos virtuales puros de su base
-* 
-* Finalmente, es importante decir que, si una clase derivada no implementa alguno de
-* los métodos virtuales puros de su base, ésta clase derivada también será una clase abstracta
+* En C++ existe la herencia múltiple, pero no es recomendable utilizarla
+* con clases normales o abstractas. No obstante, implementar múltiples
+* interfaces es común en la Programación Orientada a Objetos
 */
 
-// Vamos a convertir Enemy en una clase abstracta
-class Enemy
+// Crearemos una interfaz: Drawable
+// Ésta compuesta únicamente de métodos virtuales puros y públicos
+class Drawable
 {
-protected:
-	int hp;
-	int attack;
-	int defense;
-	std::string name;
 public:
-	Enemy()
-		: hp(0), attack(0), defense(0), name("Enemigo")
-	{
-	}
-
-	Enemy(int hp, int attack, int defense, const std::string& name)
-		: hp(hp), attack(attack), defense(defense), name(name)
-	{
-	}
-
-	Enemy(int hp, int attack, int defense)
-		: Enemy(hp, attack, defense, "Enemigo")
-	{
-	}
-
-	virtual ~Enemy()
-	{
-	}
-
-	int GetHp()
-	{
-		return hp;
-	}
-
-	void SetHp(int hp)
-	{
-		if (hp < 0)
-			return;
-
-		this->hp = hp;
-	}
-
-	int GetAttack()
-	{
-		return attack;
-	}
-
-	void SetAttack(int attack)
-	{
-		if (attack < 0)
-			return;
-
-		this->attack = attack;
-	}
-
-	int GetDefense()
-	{
-		return defense;
-	}
-
-	void SetDefense(int defense)
-	{
-		if (defense < 0)
-			return;
-
-		this->defense = defense;
-	}
-
-	// Para declarar un método virtual puro, usamos la palabra derivada 'virtual'
-	// y además, en vez de su cuerpo, escribimos '= 0;'
-	virtual void Attack() = 0;
+	virtual void Draw() = 0;
 };
 
-class Skeleton : public Enemy
+// Segundo ejemplo de interfaz
+class Printable
 {
-private:
-	int arrows;
-
 public:
-	Skeleton()
-		:arrows(0)
+	virtual std::string Print() = 0;
+};
+
+/*
+* Ahora haremos que una clase, Model implemente las interfaces Drawable y Printable
+* 
+* Model tiene que implementar los métodos de las interfaces
+* 
+* Nota cómo funciona la herencia múltiple, simplemente separando cada herencia con una coma.
+* Recuerda que ésto sólamente es recomendable para implementar múltiples interfaces
+*/
+class Model : public Drawable, public Printable
+{
+	virtual void Draw() override
 	{
+		std::cout << "Drawing model" << std::endl;
 	}
 
-	Skeleton(int hp, int attack, int defense, const std::string& name)
-		:Enemy(hp, attack, defense, name), arrows(0)
+	virtual std::string Print() override
 	{
-	}
-
-	int GetArrows()
-	{
-		return arrows;
-	}
-
-	void SetArrows(int arrows)
-	{
-		if (arrows < 0)
-			return;
-
-		this->arrows = arrows;
-	}
-
-	// Implementamos el método virtual puro Attack(), de lo contrario
-	// Skeleton seguirá siendo una clase abstracta
-	virtual void Attack() override
-	{
-		if (arrows > 0) {
-			std::cout << "The Skeleton " << name << " shoots with " << attack << " of power" << std::endl;
-			arrows--;
-		}
+		return "Model";
 	}
 };
 
-class Mummy : public Enemy
+// Segundo ejemplo de una clase que implementa las interfaces
+class Terrain : public Drawable, public Printable
 {
-private:
-	int mana;
-
-public:
-	Mummy()
-		:mana(0)
+	virtual void Draw() override
 	{
+		std::cout << "Drawing terrain" << std::endl;
 	}
 
-	Mummy(int hp, int attack, int defense, const std::string& name)
-		:Enemy(hp, attack, defense, name), mana(0)
+	virtual std::string Print() override
 	{
-	}
-
-	int GetMana()
-	{
-		return mana;
-	}
-
-	void SetMana(int mana)
-	{
-		if (mana < 0)
-			return;
-
-		this->mana = mana;
-	}
-
-	// Implementamos el método virtual puro Attack(), de lo contrario
-	// Mummy seguirá siendo una clase abstracta
-	virtual void Attack() override
-	{
-		if (mana > 0) {
-			std::cout << "The Mummy " << name << " fires magic with " << attack << " of power" << std::endl;
-			mana--;
-		}
+		return "Terrain";
 	}
 };
 
 int main()
 {
-	// ERROR: No se puede instanciar una clase abstracta
-	// Enemy* enemigo = new Enemy();
+	Model model;
+	Terrain terrain;
 
-	// *** Ejemplo que ya vimos del polimorfismo
-	Mummy* momia = new Mummy(100, 40, 20, "Momia");
-	momia->SetMana(5);
+	// Creamos un arreglo de referencias (punteros), para todos los drawable y printable
+	Drawable* drawables[] { &model, &terrain };
+	Printable* printables[] { &model, &terrain };
 
-	Skeleton* esqueleto = new Skeleton(100, 20, 5, "Esqueleto");
-	esqueleto->SetArrows(50);
-
-	Enemy* enemigos[2];
-	enemigos[0] = momia;
-	enemigos[1] = esqueleto;
-
-	for (int i = 0; i < 2; i++)
+	// Nota cómo en los siguientes ejemplos, el polimorfismo funciona igual a los ejemplos anteriores
+	std::cout << "Dibujando:" << std::endl;
+	for (Drawable* drawable : drawables)
 	{
-		enemigos[i]->Attack();
+		drawable->Draw();
 	}
 
-	delete momia;
-	delete esqueleto;
-	// ***
+	std::cout << std::endl << "Imprimiendo:" << std::endl;
+	for (Printable* printable : printables)
+	{
+		std::cout << "Imprimiendo: " << printable->Print() << std::endl;
+	}
 }
